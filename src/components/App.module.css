@@ -1,0 +1,21 @@
+.App {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 16px;
+  padding-bottom: 24px;
+}
+
+.CurrentImage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  min-width: 300px;
+}
+
+.BoxCenter{
+    display: flex;
+    justify-content: center;
+    padding-top: 24px;
+}
