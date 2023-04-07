@@ -11,7 +11,7 @@ const Loader = () => {
       width="96"
       visible={true}
       //   className={css.Loader}
-    //   wrapperStyle={{ marginLeft: "auto", marginRight: "auto" }}
+      // wrapperStyle={{ marginLeft: "auto", marginRight: "auto" }}
       wrapperClass={css.Loader}
     />
   );

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
+import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import css from './ImageGallery.module.css';
 
 const ImageGallery = ({ images, openModal, search }) => {
@@ -22,6 +22,10 @@ const ImageGallery = ({ images, openModal, search }) => {
   );
 };
 
+ImageGallery.defaultProps = {
+  images: [],
+};
+
 export default ImageGallery;
 
 ImageGallery.propTypes = {
@@ -33,5 +37,5 @@ ImageGallery.propTypes = {
       tags: PropTypes.string.isRequired,
     }).isRequired
   ),
-  openModal: PropTypes.func.isRequired,
+  openModal: PropTypes.func,
 };

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -8,109 +8,91 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
-// import scrollOnLoad from './utils/scrollLoadBtn';
 
 import css from './App.module.css';
 
-class App extends Component {
-  state = {
-    images: [],
-    search: '',
-    page: 1,
-    isLoading: false,
-    error: null,
-    currentImage: null,
-    showBtn: false,
-  };
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [showBtn, setShowBtn] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { search, page } = this.state;
-
-    if (prevState.search !== search || prevState.page !== page) {
-      this.getImages();
+  useEffect(() => {
+    if (!search) {
+      return;
     }
-  }
+    const getImages = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchApiImg(search, page);
 
-  async getImages() {
-    try {
-      this.setState({ isLoading: true });
-      const { search, page } = this.state;
-      const data = await fetchApiImg(search, page);
+        if (data.hits.length === 0) {
+          return toast.error('Oops, there are no such pictures. Try again');
+        }
 
-      if (data.hits.length === 0) {
-        return toast.error('Oops, there are no such pictures. Try again');
+        setImages(prevImages => [...prevImages, ...data.hits]);
+        setShowBtn(page < Math.ceil(data.totalHits / 12));
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
+    };
+    getImages();
+  }, [search, page]);
 
-      this.setState(({ images }) => ({
-        images: [...images, ...data.hits],
-        showBtn: this.state.page < Math.ceil(data.totalHits / 12),
-      }));
-      // if (page !== 1) {
-      //   scrollOnLoad();
-      // }
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
-
-  searchImages = ({ search }) => {
+  const onSearchImages = ({ search }) => {
     if (search.trim() === '') {
-       toast.error('Search field must be filled');
+      setImages([]);
+      setPage(1);
+      return toast.error('Repeat the question again please');
     }
-
-    this.setState({ search, images: [], page: 1 });
+    setSearch(search);
+    setImages([]);
+    setPage(1);
   };
 
-  onLoadMore = () => {
-    this.setState(({ page }) => ({ page: page + 1 }));
+  const openModal = data => {
+    setCurrentImage(data);
   };
 
-  openModal = data => {
-    this.setState({ currentImage: data });
+  const onClick = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  onClose = () => {
-    this.setState({ currentImage: null });
+  const onClose = () => {
+    setCurrentImage(null);
   };
 
-  render() {
-    const { onLoadMore, searchImages, openModal, onClose } = this;
-    const { images, isLoading, error, currentImage, search, showBtn } =
-      this.state;
+  return (
+    <>
+      <Searchbar onSubmit={onSearchImages} />
 
-    return (
-      <>
-        <Searchbar onSubmit={searchImages} />
+      {error && <p>Something went wrong. Try reloading the page</p>}
 
-        {error && <p>Something went wrong. Try reloading the page</p>}
+      {images.length > 0 && (
+        <ImageGallery images={images} openModal={openModal} search={search} />
+      )}
 
-        {images.length > 0 && (
-          <ImageGallery images={images} openModal={openModal} search={search} />
-        )}
+      {showBtn && !loading && <Button onClick={onClick} />}
 
-        {showBtn && !isLoading && <Button onLoadMore={onLoadMore} />}
+      <ToastContainer />
 
-        {/* {images.length >= 12 && !isLoading && (
-          <Button onLoadMore={onLoadMore} />
-        )} */}
+      <div className={css.BoxCenter}>{loading && <Loader />}</div>
 
-        <ToastContainer />
-
-        <div className={css.BoxCenter}>{isLoading && <Loader />}</div>
-
-        {currentImage && (
-          <Modal
-            className={css.CurrentImage}
-            currentImage={currentImage}
-            search={search}
-            onClose={onClose}
-          />
-        )}
-      </>
-    );
-  }
-}
+      {currentImage && (
+        <Modal
+          className={css.CurrentImage}
+          onClose={onClose}
+          currentImage={currentImage}
+          search={search}
+        />
+      )}
+    </>
+  );
+};
 
 export default App;

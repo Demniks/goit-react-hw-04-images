@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import css from './ImageGaleryItem.module.css';
 
-export const ImageGalleryItem = ({
+const ImageGalleryItem = ({
   webformatURL,
   largeImageURL,
   openModal,
@@ -22,6 +22,8 @@ export const ImageGalleryItem = ({
     </li>
   );
 };
+
+export default ImageGalleryItem;
 
 ImageGalleryItem.propTypes = {
   webformatURL: PropTypes.string,
